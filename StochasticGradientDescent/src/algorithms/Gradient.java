@@ -54,9 +54,13 @@ public abstract class Gradient {
 		CSVManager.add((long) 0, L);
 		
 		long iteration = 0;
+		long startClock = System.nanoTime();
 		
 		do{
-			L = computation();
+			computation();
+			time = System.nanoTime() - startClock;
+			L = CostFunction.LSNZ(V, W, H);
+			CSVManager.add(time, L);
 			iteration++;
 //			System.out.println("GD iteration : " + iteration);
 			
@@ -67,6 +71,6 @@ public abstract class Gradient {
 		return L;
 	}
 	
-	public abstract double computation();
+	public abstract void computation();
 	
 }

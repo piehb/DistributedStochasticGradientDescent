@@ -52,18 +52,10 @@ public class GradientDescent extends Gradient{
 	}
 
 	@Override
-	public double computation() {
-		
-		long startClock = System.nanoTime();
+	public void computation() {
 		
 		compute_gradient();
 		update_W_and_H();	
-		time = System.nanoTime() - startClock;
 		
-		double L = CostFunction.LSNZ(V, W, H); 
-		
-//		System.out.println("gradient : L = " + L + " , time = " + stopClock);
-		CSVManager.add(time, L);
-		return L;
 	}
 }

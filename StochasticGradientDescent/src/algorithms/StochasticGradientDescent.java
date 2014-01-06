@@ -43,15 +43,11 @@ public class StochasticGradientDescent extends Gradient{
 	}
 	
 	@Override
-	public double computation(){
+	public void computation(){
 //		System.out.println("SGD computation");
 		Random random = new Random();
 		
-		long startClock = System.nanoTime();
-		
-		double L = 0;
-		
-		for(int it = 0 ; it < V.size() ; it++){
+		//for(int it = 0 ; it < V.size() ; it++){
 			Object[] keys =  V.keySet().toArray();
 			String random_key = (String) keys[random.nextInt(keys.length)];
 			String[] ij = random_key.split(",");
@@ -60,13 +56,7 @@ public class StochasticGradientDescent extends Gradient{
 			
 			compute_gradient(iz, jz);
 			update_W_and_H(iz, jz);
-			
-			time = System.nanoTime() - startClock;
-			L = CostFunction.LSNZ(V, W, H);
-			CSVManager.add(time, L);
-		}
+		//}
 //		System.out.println("/SGD computation");
-		 
-		return L;
 	}	
 }
