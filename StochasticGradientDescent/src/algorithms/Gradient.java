@@ -12,7 +12,7 @@ public abstract class Gradient {
 
 	String filename;
 	public int m, n, r;
-	Map<String, Double> V;
+	public Map<String, Double> V;
 	double[][] W, H;
 	double epsilon = 0.0005, convergence;
 	long max_iter;
@@ -68,8 +68,6 @@ public abstract class Gradient {
 		}while(L > convergence && iteration <= max_iter);
 		
 		CSVManager.endGradient();
-		
-		time = time / V.size();
 		
 		return L;
 	}
