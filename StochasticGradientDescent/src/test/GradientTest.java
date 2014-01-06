@@ -75,7 +75,7 @@ public class GradientTest {
 					gradient = gradient("SGD", v_filename, m , n, r, convergence , max_iter);
 					
 					double L_SGD = gradient.run("SGD", path + "/L_SGD.csv");
-					long Time_SGD = gradient.time/gradient.V.size();
+					long Time_SGD = gradient.time;
 					
 					//gradient descent
 					gradient = gradient("GD", v_filename, m , n, r, convergence , max_iter);

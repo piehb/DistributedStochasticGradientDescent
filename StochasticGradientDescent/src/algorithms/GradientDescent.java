@@ -1,6 +1,9 @@
 package algorithms;
 import java.io.FileNotFoundException;
 
+import cost.CostFunction;
+import fileManager.CSVManager;
+
 
 public class GradientDescent extends Gradient{
 
@@ -49,8 +52,18 @@ public class GradientDescent extends Gradient{
 	}
 
 	@Override
-	public void computation() {
+	public double computation() {
+		
+		long startClock = System.nanoTime();
+		
 		compute_gradient();
-		update_W_and_H();		
+		update_W_and_H();	
+		time = System.nanoTime() - startClock;
+		
+		double L = CostFunction.LSNZ(V, W, H); 
+		
+//		System.out.println("gradient : L = " + L + " , time = " + stopClock);
+		CSVManager.add(time, L);
+		return L;
 	}
 }

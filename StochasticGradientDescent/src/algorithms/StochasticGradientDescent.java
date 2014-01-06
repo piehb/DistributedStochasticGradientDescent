@@ -2,6 +2,9 @@ package algorithms;
 import java.io.FileNotFoundException;
 import java.util.Random;
 
+import cost.CostFunction;
+import fileManager.CSVManager;
+
 
 public class StochasticGradientDescent extends Gradient{
 	
@@ -40,9 +43,14 @@ public class StochasticGradientDescent extends Gradient{
 	}
 	
 	@Override
-	public void computation(){
+	public double computation(){
 //		System.out.println("SGD computation");
 		Random random = new Random();
+		
+		long startClock = System.nanoTime();
+		
+		double L = 0;
+		
 		for(int it = 0 ; it < V.size() ; it++){
 			Object[] keys =  V.keySet().toArray();
 			String random_key = (String) keys[random.nextInt(keys.length)];
@@ -52,7 +60,13 @@ public class StochasticGradientDescent extends Gradient{
 			
 			compute_gradient(iz, jz);
 			update_W_and_H(iz, jz);
+			
+			time = System.nanoTime() - startClock;
+			L = CostFunction.LSNZ(V, W, H);
+			CSVManager.add(time, L);
 		}
 //		System.out.println("/SGD computation");
+		 
+		return L;
 	}	
 }

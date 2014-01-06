@@ -12,7 +12,7 @@ public abstract class Gradient {
 
 	String filename;
 	public int m, n, r;
-	public Map<String, Double> V;
+	Map<String, Double> V;
 	double[][] W, H;
 	double epsilon = 0.0005, convergence;
 	long max_iter;
@@ -54,14 +54,9 @@ public abstract class Gradient {
 		CSVManager.add((long) 0, L);
 		
 		long iteration = 0;
-		long startClock = System.nanoTime();
 		
 		do{
-			computation();
-			L = CostFunction.LSNZ(V, W, H); 
-			time = System.nanoTime() - startClock;
-//			System.out.println("gradient : L = " + L + " , time = " + stopClock);
-			CSVManager.add(time, L);
+			L = computation();
 			iteration++;
 //			System.out.println("GD iteration : " + iteration);
 			
@@ -72,6 +67,6 @@ public abstract class Gradient {
 		return L;
 	}
 	
-	public abstract void computation();
+	public abstract double computation();
 	
 }
