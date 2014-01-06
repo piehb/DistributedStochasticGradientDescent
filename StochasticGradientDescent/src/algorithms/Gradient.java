@@ -17,6 +17,8 @@ public abstract class Gradient {
 	double epsilon = 0.0005, convergence;
 	long max_iter;
 	
+	public long time;
+	
 	
 	public Gradient(String v_filename, double[][] w2, double[][] h2, int m, int n, int r, double convergence, long max_iter) throws FileNotFoundException{
 		this.m = m;
@@ -45,12 +47,11 @@ public abstract class Gradient {
 	}
 	
 	public double run(String childname, String csv_file) throws IOException{
-		double L;
 		
 		CSVManager.initGradient(csv_file, childname);
 		
-		L = CostFunction.LSNZ(V, W, H);
-		CSVManager.addCostGradient((long) 0, L);
+		double L = CostFunction.LSNZ(V, W, H);
+		CSVManager.add((long) 0, L);
 		
 		long iteration = 0;
 		long startClock = System.nanoTime();
@@ -58,13 +59,17 @@ public abstract class Gradient {
 		do{
 			computation();
 			L = CostFunction.LSNZ(V, W, H); 
-			long stop = System.nanoTime() - startClock;
-			CSVManager.addCostGradient(stop, L);
+			time = System.nanoTime() - startClock;
+//			System.out.println("gradient : L = " + L + " , time = " + stopClock);
+			CSVManager.add(time, L);
 			iteration++;
+//			System.out.println("GD iteration : " + iteration);
 			
 		}while(L > convergence && iteration <= max_iter);
 		
 		CSVManager.endGradient();
+		
+		time = time / V.size();
 		
 		return L;
 	}

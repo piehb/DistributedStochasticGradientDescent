@@ -4,10 +4,11 @@ import java.io.FileNotFoundException;
 
 public class GradientDescent extends Gradient{
 
-	double[][] W, H, gradW, gradH;
+	double[][] gradW, gradH;
 	
 	public GradientDescent(String v_filename, double[][] w2, double[][] h2, int m, int n, int r, double convergence, long max_iter) throws FileNotFoundException{
 		super(v_filename, w2, h2, m, n, r, convergence, max_iter);
+		
 	}
 	
 	public void compute_gradient(){

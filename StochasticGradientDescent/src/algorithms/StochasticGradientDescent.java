@@ -9,6 +9,7 @@ public class StochasticGradientDescent extends Gradient{
 	
 	public StochasticGradientDescent(String v_filename, double[][] w2, double[][] h2, int m, int n , int r, double convergence, long max_iter) throws FileNotFoundException{
 		super(v_filename, w2, h2, m, n, r, convergence, max_iter);
+		
 	}
 	
 	public void update_W_and_H(int iz, int jz){
@@ -40,10 +41,11 @@ public class StochasticGradientDescent extends Gradient{
 	
 	@Override
 	public void computation(){
+//		System.out.println("SGD computation");
 		Random random = new Random();
 		for(int it = 0 ; it < V.size() ; it++){
-			String[] keys = (String[]) V.keySet().toArray();
-			String random_key = keys[random.nextInt(keys.length)];
+			Object[] keys =  V.keySet().toArray();
+			String random_key = (String) keys[random.nextInt(keys.length)];
 			String[] ij = random_key.split(",");
 			
 			int iz = Integer.parseInt(ij[0]), jz = Integer.parseInt(ij[1]);
@@ -51,5 +53,6 @@ public class StochasticGradientDescent extends Gradient{
 			compute_gradient(iz, jz);
 			update_W_and_H(iz, jz);
 		}
+//		System.out.println("/SGD computation");
 	}	
 }
