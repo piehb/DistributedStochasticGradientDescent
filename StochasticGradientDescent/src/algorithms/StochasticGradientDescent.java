@@ -2,24 +2,22 @@ package algorithms;
 import java.io.FileNotFoundException;
 import java.util.Random;
 
-import cost.CostFunction;
-import fileManager.CSVManager;
-
 
 public class StochasticGradientDescent extends Gradient{
 	
 	double[] gradW, gradH;
 	
-	public StochasticGradientDescent(String v_filename, double[][] w2, double[][] h2, int m, int n , int r, double convergence, long max_iter) throws FileNotFoundException{
-		super(v_filename, w2, h2, m, n, r, convergence, max_iter);
+	public StochasticGradientDescent(String v_path, String w_path, String h_path, int m, int n , int r, int max_value, double convergence, long max_iter) throws FileNotFoundException{
+		super(v_path, w_path, h_path, m, n, r, max_value, convergence, max_iter);
+//		this.max_iter = max_iter * 10;
 		
 	}
 	
 	public void update_W_and_H(int iz, int jz){
 		
 		for(int k = 0 ; k < r ; k++){
-			W[iz][k] += (double) epsilon * gradW[k] ;
-			H[k][jz] += (double) epsilon * gradH[k] ;
+			W[iz][k] += (double) epsilon * gradW[k];
+			H[k][jz] += (double) epsilon * gradH[k];
 		}
 	}
 	
@@ -47,7 +45,7 @@ public class StochasticGradientDescent extends Gradient{
 //		System.out.println("SGD computation");
 		Random random = new Random();
 		
-		//for(int it = 0 ; it < V.size() ; it++){
+		for(int it = 0 ; it < V.size() ; it++){ //V.size()
 			Object[] keys =  V.keySet().toArray();
 			String random_key = (String) keys[random.nextInt(keys.length)];
 			String[] ij = random_key.split(",");
@@ -56,7 +54,7 @@ public class StochasticGradientDescent extends Gradient{
 			
 			compute_gradient(iz, jz);
 			update_W_and_H(iz, jz);
-		//}
+		}
 //		System.out.println("/SGD computation");
 	}	
 }

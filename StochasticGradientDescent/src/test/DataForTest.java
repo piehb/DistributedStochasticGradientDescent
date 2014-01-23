@@ -89,7 +89,7 @@ public class DataForTest {
 		return missing_values;
 	}
 	
-	public static double[][] create_random_matrix(int row, int col, double max_value) throws IOException{
+	public static double[][] create_random_matrix(int row, int col, double max_value){
 		
 		
 		double[][] M = new double[row][col];
@@ -98,7 +98,7 @@ public class DataForTest {
 		
 		for(int i = 0 ; i < row ; i++){
 			for(int j = 0 ; j < col ; j++){
-				double random_value = (double) random.nextInt() / Integer.MAX_VALUE * 2 * max_value;
+				double random_value = (double) random.nextInt(Integer.MAX_VALUE) / (Integer.MAX_VALUE-1) * 2 * max_value;
 				random_value = (double) random_value - max_value;
 //				System.out.println("random value : " + random_value);
 				
@@ -165,11 +165,114 @@ public class DataForTest {
 				for(int k = 0 ; k < r ; k++){
 					C[i][j] += (double) A[i][k] * B[k][j];
 				}
+				
 				if(min > C[i][j])			min = C[i][j];
 				else if(max < C[i][j])		max = C[i][j];
 			}
 		}
 //		System.out.println("[ DataForTest/matrixMultiplication] (min, max) = ( " + min + " , " + max + " )");
 		return C;
+	}
+	
+	
+	public static void matrixMultiplication(double[][] A, double[][] B, String V_File, int max_value) throws IOException {
+		int m = A.length, n = B[0].length, r= A[0].length;
+		/*delete file if exists*/
+		File file = new File(V_File);
+		if(file.exists()){
+			file.delete(); 
+		}
+		file.createNewFile();
+		
+		FileWriter fw = new FileWriter(file);
+		
+		double min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+		
+		for(int i = 0 ; i < m ; i++){
+			for(int j = 0 ; j < n ; j++){
+				double Cij = 0;
+				for(int k = 0 ; k < r ; k++){
+					Cij += (double) A[i][k] * B[k][j];
+				}
+				Cij += new Random().nextGaussian() + (max_value/2);
+				fw.write(i + "," + j + " " + Cij + "\n");
+				
+				/*if(C[i][j] < 0 || C[i][j] > max_value)
+					System.out.println("C[i][j] : " + C[i][j]);*/
+				
+				if(min > Cij)			min = Cij;
+				else if(max < Cij)		max = Cij;
+			}
+		}
+		
+		System.out.println("[ DataForTest/matrixMultiplication] (min, max) = ( " + min + " , " + max + " )");
+		System.out.println("end matrixMultiplication");
+		
+		fw.close();
+	}
+	
+	public static void create_sparseMatrix(int m, int n, int sparsity, String V_File) throws IOException{
+		ArrayList<String> entriesList = new ArrayList<String>();
+		
+		FileWriter fw = new FileWriter(V_File);
+		fw.write(m + " " + n + "\n");
+		
+		System.out.println("sparsity = " + sparsity);
+		
+		for(int entries = 0 ; entries <= sparsity ; entries++){
+			System.out.println("entries : " + entries);
+			String ij;
+			int i,j;
+			do{
+				i = new Random().nextInt(m);
+				j = new Random().nextInt(n);
+				ij = i + "," + j;
+				if(!entriesList.contains(ij)){
+					entriesList.add(ij);
+				}
+			}while(!entriesList.contains(ij));
+			
+			System.out.print("ij = " + ij + " : ");
+			System.out.println(GradientTest.V_tab[i][j]);
+			fw.write(ij + " " + GradientTest.V_tab[i][j] + "\n");
+			
+		}
+		fw.close();
+	}
+	
+	public static void create_sparseMatrix(int m, int n, String Vopt_path, double entriesNb, String outfile) throws IOException{
+		
+		ArrayList<String> entriesList = new ArrayList<String>();
+		
+		System.out.println("nb entries = " + entriesNb);
+		
+		for(int entries = 0 ; entries < entriesNb ; entries++){
+			/*System.out.println("   entries : " + entries);*/
+			String ij;
+			int i,j;
+			do{
+				i = new Random().nextInt(m);
+				j = new Random().nextInt(n);
+				ij = i + "," + j;
+				if(!entriesList.contains(ij)){
+					entriesList.add(ij);
+				}
+			}while(!entriesList.contains(ij));
+						
+		}
+		
+		Scanner sc = new Scanner(new File(Vopt_path));
+		FileWriter fw = new FileWriter(outfile);
+		
+		while(sc.hasNext()){
+			String line = sc.nextLine();
+			String ij = line.split(" ")[0];
+			if(entriesList.contains(ij)){
+				fw.write(line + "\n");
+			}
+		}
+		
+		sc.close();
+		fw.close();
 	}
 }

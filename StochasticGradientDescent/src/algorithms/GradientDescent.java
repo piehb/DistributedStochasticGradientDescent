@@ -1,16 +1,13 @@
 package algorithms;
 import java.io.FileNotFoundException;
 
-import cost.CostFunction;
-import fileManager.CSVManager;
-
 
 public class GradientDescent extends Gradient{
 
 	double[][] gradW, gradH;
 	
-	public GradientDescent(String v_filename, double[][] w2, double[][] h2, int m, int n, int r, double convergence, long max_iter) throws FileNotFoundException{
-		super(v_filename, w2, h2, m, n, r, convergence, max_iter);
+	public GradientDescent(String v_path,String w_path,String h_path, int m, int n, int r, int max_value, double convergence, long max_iter) throws FileNotFoundException{
+		super(v_path, w_path, h_path, m, n, r, max_value, convergence, max_iter);
 		
 	}
 	
