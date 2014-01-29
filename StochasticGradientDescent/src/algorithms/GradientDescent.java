@@ -8,7 +8,7 @@ public class GradientDescent extends Gradient{
 	
 	public GradientDescent(String v_path,String w_path,String h_path, int m, int n, int r, int max_value, double convergence, long max_iter) throws FileNotFoundException{
 		super(v_path, w_path, h_path, m, n, r, max_value, convergence, max_iter);
-		
+//		epsilon = 0.00001;
 	}
 	
 	public void compute_gradient(){

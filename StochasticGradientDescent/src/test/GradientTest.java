@@ -1,76 +1,146 @@
 package test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Random;
+import java.util.Scanner;
 
 import org.junit.Test;
 
-import cost.CostFunction;
 import algorithms.Gradient;
 import algorithms.GradientDescent;
 import algorithms.StochasticGradientDescent;
+import cost.CostFunction;
 import fileManager.CSVManager;
 import fileManager.FileManager;
 
 public class GradientTest {
 
+	int MAX_VALUE = 10;
 	public double[][] W, H;
 	public static double[][] V_tab;
 	
-	
-	/**
-	 * 1. create W and H
-	 * 2. create V
-	 * @throws IOException 
-	 */
-	public void create_V(int m, int n , int r, int max_value, String filename) throws IOException{
+	@Test
+	public void test_my_SGD_GD() throws IOException{
+		System.out.println("[test_my_SGD_GD]");	
+		int m = 3, n=3 ,  r=1;
+		String data_path = "data/m_" + m + "_n_" + n + "_r_"+r;
 		
-		double interval = Math.sqrt((double) max_value / r);
+		//init gradient
+		Gradient gradient = null;
 		
-		W = DataForTest.create_random_matrix(m, r, interval);
+		//convergence
+		double conv = 0.001;
 		
-		H = DataForTest.create_random_matrix(r, n, interval);
+		//run sgd
+		gradient = gradient("SGD", data_path + "/density_1", data_path+"/w.in", data_path+"/h.in", m , n, r, MAX_VALUE, conv , 1000);
+		double L_SGD = gradient.run("_test1_SGD", "", "");
+		//run gd
+		gradient = gradient("GD", data_path + "/density_1", data_path+"/w.in", data_path+"/h.in", m , n, r, MAX_VALUE, conv , 1000);
+		double L_GD = gradient.run("_test1_GD", "", "");
 		
-		V_tab = DataForTest.matrixMultiplication(W, H, false);
+		System.out.println((L_SGD == 0) +" , "+ (L_GD == 0) );
 		
-		DataForTest.write_matrix(filename, V_tab);
+		System.out.println("[/test_my_SGD_GD]");
+		
 	}
 	
-public void create_V_withNoise(int m, int n , int r, int max_value, String path) throws IOException{
-		
-	System.out.println("[create_V_withNoise]");
 	
-	double interval = Math.sqrt((double)max_value / r);
+public void create_V_withNoise() throws IOException{
+	System.out.println("[create_V_withNoise]");	
+	int m = 3, n=3 ,  r=1;
+	String data_path = "data/m_" + m + "_n_" + n + "_r_"+r;
 	
-	if(!new File(path + "/w_.in").exists()){
-		W = DataForTest.create_random_matrix(m, r, interval);
-		DataForTest.write_matrix(path + "/w_.in", W);
-	}else{
-		W = FileManager.read_Matrix(path + "/w_.in");
+	//output noise_repartition noise_proportion GD_reconsctruct SGD_reconstruct
+	
+	double[] noise_proportion_tab = {0.01, 0.15, 0.3, 0.5, 0.75, 0.9};
+	int[] noise_repartition_tab= {0, 1, 2, 3, 4, 5};
+	
+	//init gradient
+	Gradient gradient = null;
+	//test path
+	new File("test2/temp").mkdirs();
+	String path = "test2/";
+	
+	//delete file if exists
+	File V_File = new File("test2/"+path);
+	if(V_File.exists()){
+		V_File.delete(); 
+	}
+	V_File.createNewFile();
+	
+	FileWriter out_fw = new FileWriter(V_File);
+	
+	for(int noise_repartition : noise_repartition_tab ){
+		for(double noise_proportion: noise_proportion_tab){
+			System.out.print("[ " + noise_repartition + " , " + noise_proportion + " ] ");
+			//create new W & H
+			String w_h_directory = "test2/temp"; new File(w_h_directory).mkdirs();
+			pertubation(w_h_directory, noise_proportion, noise_repartition, data_path + "/w.in", data_path + "/h.in");
+			//run sgd
+			gradient = gradient("SGD", data_path + "/density_1.0", w_h_directory+"/w.in", w_h_directory+"/h.in", m , n, r, MAX_VALUE, 0 , 100);
+			double L_SGD = gradient.run("_SGD_rep_" + noise_repartition + "_prop_" + noise_proportion, "", "");				
+			//run gd
+			gradient = gradient("GD", data_path + "/density_1.0", w_h_directory+"/w.in", w_h_directory+"/h.in", m , n, r, MAX_VALUE, 0 , 100);
+			double L_GD = gradient.run("_GD_" + noise_repartition + "_" + noise_proportion, "", "");
+			
+			String out = noise_repartition +" "+ noise_proportion +" "+ (L_SGD == 0) +" "+ (L_GD == 0) ;
+			out_fw.write(out + "\n");
+		}
 	}
 	
-	System.out.println("end W");
-	
-	if(!new File(path + "/h_.in").exists()){
-		H = DataForTest.create_random_matrix(r, n, interval);
-		DataForTest.write_matrix(path + "/h_.in", H);
-	}else{
-		H = FileManager.read_Matrix(path + "/h_.in");
-	}
-	
-	System.out.println("end H");
-	
-	if(!new File(path + "/v.in").exists()){
-		V_tab = DataForTest.matrixMultiplication(W, H, path + "/v.in", max_value);
-	}else{
-		V_tab = FileManager.read_Matrix(path + "/v.in");
-	}
-//	V_tab = DataForTest.matrixMultiplication(W, H, false);
-	
+	out_fw.close();
 	System.out.println("[/create_V_withNoise]");
+	
+	
 }
 	
+	private void pertubation(String w_h_directory, double noise_proportion,
+			int noise_repartition, String input_w, String input_h) throws IOException {
+		// TODO Auto-generated method stub
+		
+		//init W output
+		Scanner w_sc = new Scanner(new File(input_w));
+		String w_firstline = w_sc.nextLine();
+		String[] w_m_n = w_firstline.split(" ");
+		int w_changes = (int) (Integer.parseInt(w_m_n[0]) * Integer.parseInt(w_m_n[1]) * noise_proportion);
+		FileWriter w_fw = new FileWriter(new File(w_h_directory + "/w.in")); 
+		w_fw.write(w_firstline + "\n");
+		while(w_changes > 0){
+			String[] element = w_sc.nextLine().split(" ");
+			double noise = new Random().nextGaussian() * noise_repartition;
+			float new_value = (float) (Double.parseDouble(element[1]) + noise) ;
+			w_fw.write(element[0] + " " + new_value + "\n");
+			w_changes--;
+		}
+		while(w_sc.hasNext()){
+			w_fw.write( w_sc.nextLine() + "\n" );
+		}
+		w_sc.close();
+		w_fw.close();
+		
+		//init H output
+		Scanner h_sc = new Scanner(new File(input_h));
+		String h_firstline = h_sc.nextLine();
+		String[] h_m_n = h_firstline.split(" ");
+		int h_changes = (int) (Integer.parseInt(h_m_n[0]) * Integer.parseInt(h_m_n[1]) * noise_proportion);
+		FileWriter h_fw = new FileWriter(new File(w_h_directory + "/h.in")); 
+		h_fw.write(h_firstline + "\n");
+		while(h_changes > 0){
+			String[] element = h_sc.nextLine().split(" ");
+			double noise = new Random().nextGaussian() * noise_repartition;
+			float new_value = (float) (Double.parseDouble(element[1]) + noise) ;
+			h_fw.write(element[0] + " " + new_value + "\n");
+			h_changes--;
+		}
+		while(h_sc.hasNext()){
+			h_fw.write( h_sc.nextLine() + "\n" );
+		}
+		h_sc.close();
+		h_fw.close();
+	}
+
 	/**
 	 * 1. create W and H
 	 * 2. create V
@@ -147,7 +217,7 @@ public void create_V_withNoise(int m, int n , int r, int max_value, String path)
 	}
 	
 	public Gradient gradient(String gradient_type, String v_filename, String w_filename, String h_filename, int m , int n , int r , int max_value, double convergence, int max_iter) throws IOException{
-		
+		System.out.println("conv = " + convergence);
 		Gradient gradient = null;
 		if(gradient_type.equals("GD")){
 			gradient = new GradientDescent(v_filename, w_filename, h_filename, m, n, r, max_value, convergence, max_iter);
@@ -301,12 +371,12 @@ public void create_V_withNoise(int m, int n , int r, int max_value, String path)
 		System.out.println("total space = " + space);
 	}
 	
-	@Test
+	
 	public void test_SGD_GD() throws IOException {
 		
 		System.out.println("test_SGD_GD");
 		
-		int m=300, n=100, r=10, max_value = 10;
+		int m=300, n=20, r=5, max_value = 10;
 		String path = "data/m_" +m+ "_n_" +n+ "_r_" +r;
 //		new File(path).mkdirs();
 		
@@ -326,8 +396,8 @@ public void create_V_withNoise(int m, int n , int r, int max_value, String path)
 			String h_path = path + "/temp/h.in" ;
 			DataForTest.write_matrix(h_path, DataForTest.create_random_matrix(r, n, interval));
 			
-			String[] sparse_files= { "/density_0.01", "/density_0.1", "/density_0.25", "/density_0.5", "/density_0.75", "/density_0.9", "/density_1.0"};
-			
+			String[] sparse_files= { "/density_0.01", "/density_0.1", "/density_0.25", "/density_0.5", "/density_0.75"};
+//			String[] sparse_files= { "/density_0.5" };
 			for(String V_sparse : sparse_files){
 				//sgd
 				System.out.println("start sgd " + path + " " + V_sparse);
@@ -336,10 +406,10 @@ public void create_V_withNoise(int m, int n , int r, int max_value, String path)
 				System.out.println("end sgd");
 				
 				//gradient descent
-				System.out.println("start gd " + path + " " + V_sparse);
-				gradient("GD", path + V_sparse, w_path, h_path,  m , n, r, max_value, convergence , max_iter);
+				/*System.out.println("start gd " + path + " " + V_sparse);
+				gradient = gradient("GD", path + V_sparse, w_path, h_path,  m , n, r, max_value, convergence , max_iter);
 				gradient.run("_GD_" + dif, path + V_sparse + "/L_GD.csv", path + "/density_1.0");				
-				System.out.println("end gd");
+				System.out.println("end gd");*/
 			}
 		}//end for diff
 		System.out.println("finish");

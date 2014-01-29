@@ -7,11 +7,11 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class CostFunction {
 
-	public static float LSNZ(Map<String, Double> V, double[][] W, double[][]H , int max_value){
+	public static double LSNZ(Map<String, Double> V, double[][] W, double[][]H , int max_value){
 		
 		int r = H.length;
 		
-		float L = 0;
+		double L = 0;
 		
 		for(String ij : V.keySet()){
 			String[] i_j = ij.split(",");
@@ -23,8 +23,9 @@ public class CostFunction {
 //				System.out.println("i: " + i + " , j: " + j + " , r: " + r);
 				WH_ij += W[i][k] * H[k][j];
 			}
-			
-			L += Math.pow(V.get(ij) - WH_ij + (max_value/2), 2);
+			double error = Math.pow(V.get(ij) - (WH_ij + (max_value/2)), 2);
+//			System.out.println(error);
+			L += error;
 		}
 		return L;
 	}

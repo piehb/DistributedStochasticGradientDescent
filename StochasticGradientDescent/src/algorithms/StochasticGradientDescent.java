@@ -45,7 +45,7 @@ public class StochasticGradientDescent extends Gradient{
 //		System.out.println("SGD computation");
 		Random random = new Random();
 		
-		for(int it = 0 ; it < V.size() ; it++){ //V.size()
+		for(int it = 0 ; it < 10 ; it++){ //V.size()
 			Object[] keys =  V.keySet().toArray();
 			String random_key = (String) keys[random.nextInt(keys.length)];
 			String[] ij = random_key.split(",");
